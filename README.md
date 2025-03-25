@@ -3,9 +3,6 @@
 اسکریپتی برای **پیدا کردن بهترین مقدار MTU** (Maximum Transmission Unit) در اینترفیس شبکه.  
 این ابزار **به‌طور خودکار** مقدارهای مختلف MTU را تست کرده و **بهینه‌ترین مقدار** را برای **کمترین پینگ، کمترین جتر و بدون از دست رفتن پکت‌ها** تنظیم می‌کند.
 
-🔗 **مخزن GitHub:**  
-[Arash-Ariaye/mtu-optimizer](https://github.com/Arash-Ariaye/mtu-optimizer)
-
 ---
 
 ## ✨ ویژگی‌ها
@@ -141,9 +138,3 @@ cat mtu_test_results.txt
 
 ## 📜 مجوز
 این پروژه تحت **MIT License** منتشر شده است. جزئیات بیشتر در فایل `LICENSE`.
-
----
-
-## 📬 ارتباط با من
-🔹 **GitHub:** [Arash-Ariaye](https://github.com/Arash-Ariaye)  
-🔹 **مخزن پروژه:** [mtu-optimizer](https://github.com/Arash-Ariaye/mtu-optimizer)
