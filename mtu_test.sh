@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Tanzimat sabet
-INTERFACE="eth0"  # Esm interface (masalan eth0 ya wlan0)
-TARGET_IP="8.8.8.8"  # IP baraye test (masalan 8.8.8.8 ya 1.1.1.1)
-PING_COUNT=10  # Tedad packet-ha baraye har test ping
+# Tanzimat pishfarz
+INTERFACE="${INTERFACE:-eth0}"  # Esm interface (masalan eth0 ya wlan0)
+TARGET_IP="${TARGET_IP:-8.8.8.8}"  # IP baraye test (masalan 8.8.8.8 ya 1.1.1.1)
+PING_COUNT="${PING_COUNT:-10}"  # Tedad packet-ha baraye har test ping
 
 # File khoroji baraye zakhire natayej
 OUTPUT_FILE="mtu_test_results.txt"
@@ -49,7 +49,7 @@ test_mtu() {
         # Zakhire natayej baraye tahlil
         echo "$mtu $avg_time $loss $jitter" >> "$OUTPUT_FILE"
     else
-        echo "MTU $mtu: Test namovaffagh"
+        echo "MTU $mtu: Test Namovaffagh"
         echo "$mtu failed 100 0" >> "$OUTPUT_FILE"
     fi
     
@@ -60,7 +60,7 @@ test_mtu() {
 export -f test_mtu
 export OUTPUT_FILE TEMP_DIR TARGET_IP PING_COUNT
 
-echo "Shoroo test MTU baraye IP $TARGET_IP ba $PING_COUNT packet..."
+echo "test MTU baraye IP $TARGET_IP ba $PING_COUNT packet..."
 
 # Halqe baraye test MTU-ha az 1475 ta 1420
 for ((mtu=1475; mtu>=1420; mtu--)); do
@@ -91,7 +91,7 @@ if [ -n "$best_mtu" ]; then
     # Set kardan MTU rooye interface
     echo "Dar hal set kardan MTU $mtu_value rooye interface $INTERFACE..."
     if ip link set dev "$INTERFACE" mtu "$mtu_value"; then
-        echo "MTU ba movaffaghiat rooye $INTERFACE set shod."
+        echo "MTU ba movaffaghiat rooye $INTERFACE set shod. IRVM.ORG"
     else
         echo "Error: Set kardan MTU rooye $INTERFACE ba moghiyyat roobroo shod!"
     fi
@@ -100,4 +100,4 @@ else
 fi
 
 rm -rf "$TEMP_DIR"
-echo "Natayej kamel dar file $OUTPUT_FILE zakhire shode ast"
+echo "Natayej kamel dar file $OUTPUT_FILE zakhire shode ast IRVM.ORG"
