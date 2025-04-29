@@ -148,7 +148,7 @@ export OUTPUT_FILE TEMP_DIR TARGET_IP PING_COUNT LOCK_FILE
 echo "Shoroo test MTU baraye IP $TARGET_IP ba $PING_COUNT packet..."
 
 # Halqe baraye test MTU-ha az 1476 ta 1420 (parallel)
-for ((mtu=1476; mtu>=1420; mtu--)); do
+for ((mtu=1475; mtu>=1420; mtu--)); do
     while [ $(jobs -r | wc -l) -ge $MAX_CONCURRENT ]; do
         sleep 0.1
     done
