@@ -8,7 +8,7 @@ PING_COUNT="${PING_COUNT:-10}"
 # File khoroji baraye zakhire natayej
 OUTPUT_FILE="mtu_test_results.txt"
 TEMP_DIR="mtu_temp"
-MAX_CONCURRENT=5  # Tedad test-haye hamzaman
+MAX_CONCURRENT=3  # Kam kardan tedad test-haye hamzaman
 LOCK_FILE="$TEMP_DIR/lock"
 
 # Tabe baraye set kardan MTU ba khatayabi
@@ -47,7 +47,7 @@ install_packages() {
 }
 
 # Trap baraye set kardan MTU 1420 dar moghiyyat ya cancel
-trap 'echo "Moghiyyat ya cancel shod. Set kardan MTU be 1420..."; ip link set dev "$INTERFACE" mtu 1420; rm -rf "$TEMP_DIR"; exit 1' INT TERM EXIT
+trap 'echo "Moghiyyat ya cancel shod. Set kardan MTU be 1420..."; ip link set dev "$INTERFACE" mtu 1420; exit 1' INT TERM
 
 # Check kardan va nasb package-ha
 install_packages
@@ -71,22 +71,31 @@ if ! ping -c 1 "$TARGET_IP" > /dev/null 2>&1; then
 fi
 
 # Set kardan MTU be 1500 ghabl az shoroo test
-set_mtu 1500
+set_mtu 1475
 
 # Pak kardan file ghabli va sakht directory moaghat
 > "$OUTPUT_FILE"
-mkdir -p "$TEMP_DIR"
-: > "$LOCK_FILE"
+mkdir -p "$TEMP_DIR" || { echo "Error: Nemitavan dastresi be $TEMP_DIR peyda kard"; exit 1; }
+touch "$LOCK_FILE" || { echo "Error: Nemitavan file lock $LOCK_FILE ra besazad"; exit 1; }
 
 # Tabe baraye test ping ba MTU moshakhas
 test_mtu() {
     local mtu=$1
     local temp_file="$TEMP_DIR/mtu_${mtu}_$$.tmp"  # Estefade az PID baraye jologiri az tadakhol
 
+    # Sure shodan az vojood TEMP_DIR
+    mkdir -p "$TEMP_DIR" || { echo "Error: Nemitavan dastresi be $TEMP_DIR peyda kard"; exit 1; }
+
     # Anjam test ping ba tedad packet moshakhas va timeout
     ping -c "$PING_COUNT" -W 2 -M do -s $((mtu - 28)) "$TARGET_IP" > "$temp_file" 2>/dev/null
 
     if [ $? -eq 0 ]; then
+        # Check kardan vojood file lock
+        if [ ! -f "$LOCK_FILE" ]; then
+            echo "Error: File lock $LOCK_FILE vojood nadarad!"
+            exit 1
+        fi
+
         # Check kardan vojood file va khali naboodan
         if [ ! -s "$temp_file" ]; then
             flock -x "$LOCK_FILE" echo "MTU $mtu: Khata - File khoroji khali ast"
@@ -121,6 +130,10 @@ test_mtu() {
         # Zakhire natayej baraye tahlil
         echo "$mtu $avg_time $loss $jitter" >> "$OUTPUT_FILE"
     else
+        if [ ! -f "$LOCK_FILE" ]; then
+            echo "Error: File lock $LOCK_FILE vojood nadarad!"
+            exit 1
+        fi
         flock -x "$LOCK_FILE" echo "MTU $mtu: Test namovaffagh"
         echo "$mtu failed 100 0" >> "$OUTPUT_FILE"
     fi
@@ -144,12 +157,9 @@ done
 
 wait
 
-# Hazf trap EXIT ta MTU 1420 faghat dar moghiyyat ya cancel set beshe
-trap - EXIT
-
 echo -e "\nTest-ha kamel shod. Dar hal tahlil natayej...\n"
 
-# Peyda kardan behtarin MTU ba dar nazar gereftan Packet Loss, Jitter, Ping
+# Peyda kardan hydroxide MTU ba dar nazar gereftan Packet Loss, Jitter, Ping
 best_mtu=$(cat "$OUTPUT_FILE" | grep -v "failed" | sort -k3 -n -k4 -n -k2 -n | head -n 1)
 
 if [ -n "$best_mtu" ]; then
@@ -169,5 +179,6 @@ else
     set_mtu 1420
 fi
 
+# Pak kardan directory moaghat
 rm -rf "$TEMP_DIR"
 echo "Natayej kamel dar file $OUTPUT_FILE zakhire shode ast"
